@@ -1,0 +1,41 @@
+{
+  "name": "lexus-jsonl",
+  "version": "1.0.0",
+  "description": "Lexus queres over streams of jsonl",
+  "main": "lexus-jsonl.js",
+  "scripts": {
+    "start": "node lexus-jsonl.js",
+    "test": "npm run lint ; mocha --ui tdd --recursive test/",
+    "lint": "./node_modules/.bin/eslint ./ || exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vasil9v/lexus-jsonl"
+  },
+  "keywords": [
+    "analytics",
+    "jsonl",
+    "streaming queries"
+  ],
+  "author": "Vasilios Daskalopoulos",
+  "contributors": [
+    {
+      "name": "Vasilios Daskalopoulos",
+      "email": "vasil9v@gmail.com"
+    }
+  ],
+  "license": "TODO",
+  "dependencies": {
+    "dot-notes": "^3.1.1"
+  },
+  "devDependencies": {
+    "eslint": "^4.13.1",
+    "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "mocha": "3.5.0",
+    "should": "13.0.0"
+  }
+}
