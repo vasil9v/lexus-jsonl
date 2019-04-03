@@ -1,6 +1,6 @@
 ### Lexus on jsonl Streams
 
-This project is a JavaScript implementation of the [Lexus query langauge](https://github.com/appcelerator/lexus-spec/blob/master/spec/v0.2/docs/Getting-Started-With-Lexus.md) on streams of json documents. The stream can be anything that can pipe to `stdout`.
+This project is a JavaScript implementation of the [Lexus query langauge](https://github.com/appcelerator/lexus) on streams of json documents. The stream can be anything that can pipe to `stdout`.
 
 ### Test Data Set
 
