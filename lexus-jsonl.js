@@ -28,12 +28,12 @@ let lexusEventStream = {
     }
     for (let i = 0; i < this.lexusQuery.length; i += 1) {
       this.lexusQuery[i].group_by = this.lexusQuery[i].group_by || [];
-      this.lexusQuery[i].invoke.params = this.lexusQuery[i].invoke.params || {};
-      if (this.lexusQuery[i].invoke.method === "find") {
-        this.lexusQuery[i].invoke.params.limit = this.lexusQuery[i].invoke.params.limit || 10;
+      this.lexusQuery[i].operation.params = this.lexusQuery[i].operation.params || {};
+      if (this.lexusQuery[i].operation.method === "find") {
+        this.lexusQuery[i].operation.params.limit = this.lexusQuery[i].operation.params.limit || 10;
       }
-      if (this.lexusQuery[i].invoke.method in {"distinct": 1, "cardinality": 1}) {
-        this.lexusQuery[i].group_by.push(this.lexusQuery[i].invoke.field);
+      if (this.lexusQuery[i].operation.method in {"distinct": 1, "cardinality": 1}) {
+        this.lexusQuery[i].group_by.push(this.lexusQuery[i].operation.field);
       }
 
       // normalize each group_by item into extended format
@@ -87,7 +87,7 @@ let lexusEventStream = {
           break;
         case "$prefix":
           for (let field in filter[op]) {
-            if (!(field in json) || !dots.get(json, field).startsWith(filter[op][field])) {
+            if (!(dots.get(json, field)) || !dots.get(json, field).startsWith(filter[op][field])) {
               return false;
             }
           }
@@ -95,7 +95,7 @@ let lexusEventStream = {
           break;
         case "$suffix":
           for (let field in filter[op]) {
-            if (!(field in json) || !dots.get(json, field).endsWith(filter[op][field])) {
+            if (!(dots.get(json, field)) || !dots.get(json, field).endsWith(filter[op][field])) {
               return false;
             }
           }
@@ -170,10 +170,10 @@ let lexusEventStream = {
       // sort them by count
       let dict = this.sortedDict(json._lexusDistinct);
 
-      if ("limit" in query.invoke.params) {
-        dict = dict.slice(0, Number(query.invoke.params.limit));
+      if ("limit" in query.operation.params) {
+        dict = dict.slice(0, Number(query.operation.params.limit));
       }
-      if ("count" in query.invoke.params && query.invoke.params.count === false) {
+      if ("count" in query.operation.params && query.operation.params.count === false) {
         return this.dictKeys(dict);
       }
       return this.dictObj(dict);
@@ -259,25 +259,25 @@ let lexusEventStream = {
             key = Math.round(Number(key) / interval) * interval;
           }
         }
-        switch (this.lexusQuery[i].invoke.method) {
+        switch (this.lexusQuery[i].operation.method) {
           case "min":
-            if (!leaf[key] || Number(json[this.lexusQuery[i].invoke.field]) < leaf[key]) {
-              leaf[key] = Number(json[this.lexusQuery[i].invoke.field]);
+            if (!leaf[key] || Number(json[this.lexusQuery[i].operation.field]) < leaf[key]) {
+              leaf[key] = Number(json[this.lexusQuery[i].operation.field]);
             }
             break;
           case "max":
-            if (!leaf[key] || Number(json[this.lexusQuery[i].invoke.field]) > leaf[key]) {
-              leaf[key] = Number(json[this.lexusQuery[i].invoke.field]);
+            if (!leaf[key] || Number(json[this.lexusQuery[i].operation.field]) > leaf[key]) {
+              leaf[key] = Number(json[this.lexusQuery[i].operation.field]);
             }
             break;
           case "sum":
             leaf[key] = leaf[key] || 0;
-            leaf[key] += Number(json[this.lexusQuery[i].invoke.field]);
+            leaf[key] += Number(json[this.lexusQuery[i].operation.field]);
             break;
           case "avg":
             leaf[key] = leaf[key] || {"_lexusAvg": {"n": 0, "v": 0}};
             leaf[key]._lexusAvg.n += 1;
-            leaf[key]._lexusAvg.v += Number(json[this.lexusQuery[i].invoke.field]);
+            leaf[key]._lexusAvg.v += Number(json[this.lexusQuery[i].operation.field]);
             break;
           case "count":
             inc(leaf, key, 1);
@@ -294,8 +294,8 @@ let lexusEventStream = {
             break;
           case "find":
             leaf[key] = leaf[key] || [];
-            if (leaf[key].length < this.lexusQuery[i].invoke.params.limit) {
-              leaf[key].push(this.projection(this.lexusQuery[i].invoke.params, json));
+            if (leaf[key].length < this.lexusQuery[i].operation.params.limit) {
+              leaf[key].push(this.projection(this.lexusQuery[i].operation.params, json));
             }
             break;
 
@@ -315,7 +315,7 @@ let lexusEventStream = {
                 "enum": [ -1, 1 ]
             */
           default:
-            lexusError("method not supported: " + this.lexusQuery[i].invoke.method);
+            lexusError("method not supported: " + this.lexusQuery[i].operation.method);
         }
       }
     }

@@ -21,7 +21,7 @@ $ wc -l events.json
        8 events.json
 ```
 We'll use this as an example data stream to show expected results with some simple Lexus queries.
-For more details on the Lexus syntax see [this document](https://github.com/appcelerator/lexus-spec/blob/master/spec/v0.2/docs/Getting-Started-With-Lexus.md).
+For more details on the Lexus syntax see [this document](https://github.com/appcelerator/lexus/blob/master/docs/getting-started.md).
 In each example, the stdout of the eventstream/eventstream.js script is redirected to `stdout` to show that this tool can be used as part of a command line pipeline.
 The output results are sent to `stderr`.
 Note that the Lexus query itself is passed as the first argument to the script.
@@ -31,7 +31,7 @@ Note that the Lexus query itself is passed as the first argument to the script.
 A simple count method should bring back the same result as the `wc -l` above:
 
 ```
-$ cat events.json | node backends/eventstream/eventstream.js '[{"version": "0.2", "invoke": {"method": "count"}}]' > nextBrick.txt
+$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "count"}}]' > nextBrick.txt
 [{"version":"0.2","result":8}]
 ```
 
@@ -40,7 +40,7 @@ $ cat events.json | node backends/eventstream/eventstream.js '[{"version": "0.2"
 Each `platform` and `url` combination has 2 documents:
 
 ```
-$ cat events.json | node backends/eventstream/eventstream.js '[{"version": "0.2", "invoke": {"method": "count"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
+$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "count"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
 [{"version":"0.2","result":{"linux":{"/api/v1/users/login":2,"/api/v1/users/logout":2},"windows":{"/api/v1/users/login":2,"/api/v1/users/logout":2}}}]
 ```
 
@@ -49,35 +49,36 @@ We'll use the same group_by in each of the subsequent examples.
 ### Sum
 
 ```
-cat events.json | node backends/eventstream/eventstream.js '[{"version": "0.2", "invoke": {"method": "sum", "field": "millis"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
+$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "sum", "field": "millis"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
 [{"version":"0.2","result":{"linux":{"/api/v1/users/login":1750,"/api/v1/users/logout":1123},"windows":{"/api/v1/users/login":1359,"/api/v1/users/logout":539}}}]
 ```
 
 ### Avg
 
 ```
-cat events.json | node backends/eventstream/eventstream.js '[{"version": "0.2", "invoke": {"method": "avg", "field": "millis"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
+$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "avg", "field": "millis"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
 [{"version":"0.2","result":{"linux":{"/api/v1/users/login":875,"/api/v1/users/logout":561.5},"windows":{"/api/v1/users/login":679.5,"/api/v1/users/logout":269.5}}}]
 ```
 
 ### Min
 
 ```
-$ cat events.json | node backends/eventstream/eventstream.js '[{"version": "0.2", "invoke": {"method": "min", "field": "millis"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
+$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "min", "field": "millis"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
 [{"version":"0.2","result":{"linux":{"/api/v1/users/login":750,"/api/v1/users/logout":323},"windows":{"/api/v1/users/login":259,"/api/v1/users/logout":199}}}]
+
 ```
 
 ### Max
 
 ```
-$ cat events.json | node backends/eventstream/eventstream.js '[{"version": "0.2", "invoke": {"method": "max", "field": "millis"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
+$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "max", "field": "millis"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
 [{"version":"0.2","result":{"linux":{"/api/v1/users/login":1000,"/api/v1/users/logout":800},"windows":{"/api/v1/users/login":1100,"/api/v1/users/logout":340}}}]
 ```
 
 ### Run Tests
 
-Finally, if `test` is passed to the script instead of a Lexus Query, it runs an internal set of unit tests.
+To run all the unit tests for lexus-jsonl simply do:
 
 ```
-node backends/eventstream/eventstream.js test
+npm test
 ```
