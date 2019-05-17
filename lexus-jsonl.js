@@ -1,7 +1,7 @@
 const dots = require("dot-notes");
 const readline = require("readline");
 const should = require("should");
-const LEXUS_VERSION = "0.2";
+const LEXUS_VERSION = "0.3";
 let linesRead;
 let perlines = null;
 
@@ -27,21 +27,21 @@ let lexusEventStream = {
       this.lexusQuery = [this.lexusQuery];
     }
     for (let i = 0; i < this.lexusQuery.length; i += 1) {
-      this.lexusQuery[i].group_by = this.lexusQuery[i].group_by || [];
+      this.lexusQuery[i].groups = this.lexusQuery[i].groups || [];
       this.lexusQuery[i].operation.params = this.lexusQuery[i].operation.params || {};
       if (this.lexusQuery[i].operation.method === "find") {
         this.lexusQuery[i].operation.params.limit = this.lexusQuery[i].operation.params.limit || 10;
       }
-      if (this.lexusQuery[i].operation.method in {"distinct": 1, "cardinality": 1}) {
-        this.lexusQuery[i].group_by.push(this.lexusQuery[i].operation.field);
+      if (this.lexusQuery[i].operation.method === "unique") {
+        this.lexusQuery[i].groups.push(this.lexusQuery[i].operation.field);
       }
 
-      // normalize each group_by item into extended format
-      for (let g = 0; g < this.lexusQuery[i].group_by.length; g += 1) {
-        if (typeof(this.lexusQuery[i].group_by[g]) !== "object") {
-          this.lexusQuery[i].group_by[g] = {
+      // normalize each groups item into extended format
+      for (let g = 0; g < this.lexusQuery[i].groups.length; g += 1) {
+        if (typeof(this.lexusQuery[i].groups[g]) !== "object") {
+          this.lexusQuery[i].groups[g] = {
             "type": "string",
-            "field": this.lexusQuery[i].group_by[g]
+            "field": this.lexusQuery[i].groups[g]
           };
         }
       }
@@ -127,7 +127,7 @@ let lexusEventStream = {
           }
           break;
         default:
-          lexusError("filter not supported: " + op);
+          console.error("filter not supported: " + op);
           break;
       }
     }
@@ -165,18 +165,6 @@ let lexusEventStream = {
   finalizeResult: function (query, json) {
     if (typeof(json) !== "object") {
       return json;
-    }
-    if ("_lexusDistinct" in json) {
-      // sort them by count
-      let dict = this.sortedDict(json._lexusDistinct);
-
-      if ("limit" in query.operation.params) {
-        dict = dict.slice(0, Number(query.operation.params.limit));
-      }
-      if ("count" in query.operation.params && query.operation.params.count === false) {
-        return this.dictKeys(dict);
-      }
-      return this.dictObj(dict);
     }
     if ("_lexusAvg" in json) {
       return json._lexusAvg.v / json._lexusAvg.n;
@@ -245,17 +233,17 @@ let lexusEventStream = {
       if (this.filter(json, this.lexusQuery[i].filters || {})) {
         let leaf = this.lexusResult[i];
         let key = "result";
-        for (let j = 0; j < this.lexusQuery[i].group_by.length; j += 1) {
+        for (let j = 0; j < this.lexusQuery[i].groups.length; j += 1) {
           if (!(key in leaf)) {
             leaf[key] = {};
           }
           leaf = leaf[key];
-          key = dots.get(json, this.lexusQuery[i].group_by[j].field);
-          if (this.lexusQuery[i].group_by[j].type === "date") {
-            key = this.dateBucketOf(key, this.lexusQuery[i].group_by[j].params.interval);
+          key = dots.get(json, this.lexusQuery[i].groups[j].field);
+          if (this.lexusQuery[i].groups[j].type === "date") {
+            key = this.dateBucketOf(key, this.lexusQuery[i].groups[j].params.interval);
           }
-          if (this.lexusQuery[i].group_by[j].type === "numeric") {
-            let interval = Number(this.lexusQuery[i].group_by[j].params.interval);
+          if (this.lexusQuery[i].groups[j].type === "numeric") {
+            let interval = Number(this.lexusQuery[i].groups[j].params.interval);
             key = Math.round(Number(key) / interval) * interval;
           }
         }
@@ -282,11 +270,7 @@ let lexusEventStream = {
           case "count":
             inc(leaf, key, 1);
             break;
-          case "distinct":
-            leaf._lexusDistinct = leaf._lexusDistinct || {};
-            inc(leaf._lexusDistinct, key, 1);
-            break;
-          case "cardinality":
+          case "unique":
             if (!leaf._lexusCard) {
               leaf._lexusCard = {};
             }
@@ -315,7 +299,7 @@ let lexusEventStream = {
                 "enum": [ -1, 1 ]
             */
           default:
-            lexusError("method not supported: " + this.lexusQuery[i].operation.method);
+            console.error("method not supported: " + this.lexusQuery[i].operation.method);
         }
       }
     }
