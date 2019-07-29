@@ -27,6 +27,8 @@
   "license": "TODO",
   "dependencies": {
     "dot-notes": "^3.1.1",
+    "diff": ">=3.5.0",
+    "growl": ">=1.10.0",
     "lexus": "git+https://github.com/appcelerator/lexus.git"
   },
   "devDependencies": {
@@ -36,7 +38,7 @@
     "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-standard": "^3.0.1",
-    "mocha": "3.5.0",
+    "mocha": "^6.2.0",
     "should": "13.0.0"
   }
 }
