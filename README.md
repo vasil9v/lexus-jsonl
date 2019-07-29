@@ -22,8 +22,8 @@ $ wc -l events.json
 ```
 We'll use this as an example data stream to show expected results with some simple Lexus queries.
 For more details on the Lexus syntax see [this document](https://github.com/appcelerator/lexus/blob/master/docs/getting-started.md).
-In each example, the stdout of the eventstream/eventstream.js script is redirected to `stdout` to show that this tool can be used as part of a command line pipeline.
-The output results are sent to `stderr`.
+The stdout of the lexus-jsonl.js script is redirected to `stdout` to show that this tool can be used as part of a command line pipeline. In each example below, this stdout is redirected to `/dev/null`.
+The output results of the Lexus query are sent to `stderr`.
 Note that the Lexus query itself is passed as the first argument to the script.
 
 ### Count
@@ -31,39 +31,48 @@ Note that the Lexus query itself is passed as the first argument to the script.
 A simple count method should bring back the same result as the `wc -l` above:
 
 ```
-$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "count"}}]' > nextBrick.txt
+$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "count"}}]' > /dev/null
 [{"version":"0.2","result":8}]
 ```
 
-### Group_by 2 Dimensions
+### Group By
+
+You can use the `groups` field to specify a field to have the results grouped-by:
+
+```
+$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "count"}, "groups": ["platform"]}]' > /dev/null
+[{"version":"0.3","result":{"linux":4,"windows":4}}]
+```
+
+### Group By 2 Dimensions
 
 Each `platform` and `url` combination has 2 documents:
 
 ```
-$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "count"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
+$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "count"}, "groups": ["platform", "url"]}]' > /dev/null
 [{"version":"0.2","result":{"linux":{"/api/v1/users/login":2,"/api/v1/users/logout":2},"windows":{"/api/v1/users/login":2,"/api/v1/users/logout":2}}}]
 ```
 
-We'll use the same group_by in each of the subsequent examples.
+We'll use the same groups in each of the subsequent examples.
 
 ### Sum
 
 ```
-$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "sum", "field": "millis"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
+$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "sum", "field": "millis"}, "groups": ["platform", "url"]}]' > /dev/null
 [{"version":"0.2","result":{"linux":{"/api/v1/users/login":1750,"/api/v1/users/logout":1123},"windows":{"/api/v1/users/login":1359,"/api/v1/users/logout":539}}}]
 ```
 
 ### Avg
 
 ```
-$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "avg", "field": "millis"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
+$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "avg", "field": "millis"}, "groups": ["platform", "url"]}]' > /dev/null
 [{"version":"0.2","result":{"linux":{"/api/v1/users/login":875,"/api/v1/users/logout":561.5},"windows":{"/api/v1/users/login":679.5,"/api/v1/users/logout":269.5}}}]
 ```
 
 ### Min
 
 ```
-$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "min", "field": "millis"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
+$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "min", "field": "millis"}, "groups": ["platform", "url"]}]' > /dev/null
 [{"version":"0.2","result":{"linux":{"/api/v1/users/login":750,"/api/v1/users/logout":323},"windows":{"/api/v1/users/login":259,"/api/v1/users/logout":199}}}]
 
 ```
@@ -71,7 +80,7 @@ $ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"meth
 ### Max
 
 ```
-$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "max", "field": "millis"}, "group_by": ["platform", "url"]}]' > nextBrick.txt
+$ cat events.json | node lexus-jsonl.js '[{"version": "0.2", "operation": {"method": "max", "field": "millis"}, "groups": ["platform", "url"]}]' > /dev/null
 [{"version":"0.2","result":{"linux":{"/api/v1/users/login":1000,"/api/v1/users/logout":800},"windows":{"/api/v1/users/login":1100,"/api/v1/users/logout":340}}}]
 ```
 
