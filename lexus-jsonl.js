@@ -1,15 +1,7 @@
 const dots = require("dot-notes");
-const readline = require("readline");
-const should = require("should");
 const LEXUS_VERSION = "0.3";
 let linesRead;
 let perlines = null;
-
-let rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  terminal: false
-});
 
 function inc(d, k, v) {
   d[k] = d[k] || 0;
@@ -307,6 +299,13 @@ let lexusEventStream = {
 };
 
 if (require.main === module) {
+  const readline = require("readline");
+
+  let rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: false
+  });
 
   function doStart() {
     lexusEventStream.init(process.argv[2]);
