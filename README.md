@@ -22,9 +22,11 @@ $ wc -l events.json
 ```
 We'll use this as an example data stream to show expected results with some simple Lexus queries.
 For more details on the Lexus syntax see [this document](https://github.com/appcelerator/lexus/blob/master/docs/getting-started.md).
-The stdout of the lexus-jsonl.js script is redirected to `stdout` to show that this tool can be used as part of a command line pipeline. In each example below, this stdout is redirected to `/dev/null`.
+
+The input from `stdin` is read by the `lexus-jsonl.js` script, processed, and copied to `stdout` so that this tool can be used as part of a command line pipeline.
+In each example below, this stdout is redirected to `/dev/null` since it isn't used here.
 The output results of the Lexus query are sent to `stderr`.
-Note that the Lexus query itself is passed as the first argument to the script.
+That the Lexus query itself is passed as the first argument to the script.
 
 ### Count
 

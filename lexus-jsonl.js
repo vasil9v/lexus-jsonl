@@ -241,23 +241,23 @@ let lexusEventStream = {
         }
         switch (this.lexusQuery[i].operation.method) {
           case "min":
-            if (!leaf[key] || Number(json[this.lexusQuery[i].operation.field]) < leaf[key]) {
-              leaf[key] = Number(json[this.lexusQuery[i].operation.field]);
+            if (!leaf[key] || Number(dots.get(json, this.lexusQuery[i].operation.field)) < leaf[key]) {
+              leaf[key] = Number(dots.get(json, this.lexusQuery[i].operation.field));
             }
             break;
           case "max":
-            if (!leaf[key] || Number(json[this.lexusQuery[i].operation.field]) > leaf[key]) {
-              leaf[key] = Number(json[this.lexusQuery[i].operation.field]);
+            if (!leaf[key] || Number(dots.get(json, this.lexusQuery[i].operation.field)) > leaf[key]) {
+              leaf[key] = Number(dots.get(json, this.lexusQuery[i].operation.field));
             }
             break;
           case "sum":
             leaf[key] = leaf[key] || 0;
-            leaf[key] += Number(json[this.lexusQuery[i].operation.field]);
+            leaf[key] += Number(dots.get(json, this.lexusQuery[i].operation.field));
             break;
           case "avg":
             leaf[key] = leaf[key] || {"_lexusAvg": {"n": 0, "v": 0}};
             leaf[key]._lexusAvg.n += 1;
-            leaf[key]._lexusAvg.v += Number(json[this.lexusQuery[i].operation.field]);
+            leaf[key]._lexusAvg.v += Number(dots.get(json, this.lexusQuery[i].operation.field));
             break;
           case "count":
             inc(leaf, key, 1);
