@@ -30,7 +30,7 @@ let lexusEventStream = {
 
       // normalize each groups item into extended format
       for (let g = 0; g < this.lexusQuery[i].groups.length; g += 1) {
-        if (typeof(this.lexusQuery[i].groups[g]) !== "object") {
+        if (typeof this.lexusQuery[i].groups[g] !== "object") {
           this.lexusQuery[i].groups[g] = {
             "type": "string",
             "field": this.lexusQuery[i].groups[g]
@@ -155,7 +155,7 @@ let lexusEventStream = {
     }
   },
   finalizeResult: function (query, json) {
-    if (typeof(json) !== "object") {
+    if (typeof json !== "object") {
       return json;
     }
     if ("_lexusAvg" in json) {
@@ -181,7 +181,7 @@ let lexusEventStream = {
     }
     if (params.include) {
       for (let field of params.include) {
-        json2[field] = json[field]; // todo dots.get(json, field)
+        json2[field] = dots.get(json, field);
       }
     }
     return json2;
