@@ -1,6 +1,7 @@
 import sys
 import json
 from date_bucket import date_bucket_of
+from dots_get import dots_get
 
 
 LEXUS_VERSION = "0.3"
@@ -12,55 +13,6 @@ state = {
 
 def to_std_err(s):
   print(s, file=sys.stderr)
-
-
-def test_dots_get():
-  r = dots_get({ "test": { "test": "example" } }, 'test.test')
-  assert r == "example", r
-  r = dots_keys('this["is"].my[1].example')
-  assert r == [ 'this', 'is', 'my', 1, 'example' ], r
-  r = dots_keys('this.is.my[1].example')
-  assert r == [ 'this', 'is', 'my', 1, 'example' ], r
-
-
-def unquote(s):
-  if len(s) > 1:
-    if s[0] in {"'", '"'}:
-      if s[0] == s[-1]:
-        return s[1:-1]
-  return s
-
-
-def extract_array_indexes(l):
-  r = []
-  for i in l:
-    if "[" in i:
-      idx = i.find("[")
-      edx = i.find("]", idx)
-      r.append(i[0:idx])
-      value = i[idx+1:edx]
-      if value.isnumeric():
-        value = int(value)
-      else:
-        value = unquote(value)
-      r.append(value)
-    else:
-      r.append(i)
-  return r
-
-
-def dots_keys(field):
-  segments = field.split(".")
-  segments = extract_array_indexes(segments)
-  return segments
-
-
-def dots_get(obj, field):
-  segments = dots_keys(field)
-  while obj and len(segments) > 0:
-    obj = obj.get(segments[0])
-    segments = segments[1:]
-  return obj
 
 
 def inc(d, k, v):
@@ -260,29 +212,26 @@ class LexusEventStream:
 def do_start():
   lexusEventStream = LexusEventStream(sys.argv[1])
   state["lines_read"] = 0
+  return lexusEventStream
 
 
-def do_final():
+def do_final(lexusEventStream):
   lexusEventStream.finalize()
-  to_std_err(json.dumps(lexusEventStream.lexusResult))
+  to_std_err(json.dumps(lexusEventStream.lexus_result))
 
 
-if __name__ == "__main__x":
+if __name__ == "__main__":
   if len(sys.argv) > 2:
     state["per_lines"] = int(sys.argv[2])
 
-  do_start()
+  lexusEventStream = do_start()
 
   for line in sys.stdin:
     lexusEventStream.process_event(json.loads(line.strip()))
     state["lines_read"] += 1
     if state["per_lines"] and (state["lines_read"] > state["per_lines"]):
-      do_final()
-      do_start()
+      do_final(lexusEventStream)
+      lexusEventStream = do_start()
     print(line)
 
-  do_final()
-
-
-if __name__ == "__main__":
-  test_dots_get()
+  do_final(lexusEventStream)
